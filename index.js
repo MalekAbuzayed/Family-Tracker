@@ -57,7 +57,7 @@ async function checkVisisted() {
 
 async function getCurrentUserColor() {
   const result = await db.query("SELECT * FROM users WHERE id = $1", [currentUserId]);
-  return result.rows[0]?.color || "teal"; // Default color if user not found
+  return result.rows[0]?.color || "teal";
 }
 
 app.get("/", async (req, res) => {
@@ -81,6 +81,12 @@ app.post("/add", async (req, res) => {
       [input.toLowerCase()]
     );
 
+    if (!result.rows[0]) {
+      console.log("Country not found:", input);
+      res.redirect("/");
+      return;
+    }
+
     const data = result.rows[0];
     const countryCode = data.country_code;
     try {
@@ -91,9 +97,11 @@ app.post("/add", async (req, res) => {
       res.redirect("/");
     } catch (err) {
       console.log(err);
+      res.redirect("/");
     }
   } catch (err) {
     console.log(err);
+    res.redirect("/");
   }
 });
 
