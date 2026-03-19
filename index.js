@@ -34,6 +34,13 @@ async function initializeDatabase() {
       );
     `);
     console.log("Database initialized");
+
+    // Insert default user if none exists
+    const userCheck = await db.query("SELECT COUNT(*) FROM users");
+    if (userCheck.rows[0].count === "0") {
+      await db.query("INSERT INTO users (name, color) VALUES ($1, $2)", ["Default User", "teal"]);
+      console.log("Default user created");
+    }
   } catch (err) {
     console.log("Database initialization error:", err);
   }
@@ -50,7 +57,7 @@ async function checkVisisted() {
 
 async function getCurrentUserColor() {
   const result = await db.query("SELECT * FROM users WHERE id = $1", [currentUserId]);
-  return result.rows[0].color;
+  return result.rows[0]?.color || "teal"; // Default color if user not found
 }
 
 app.get("/", async (req, res) => {
